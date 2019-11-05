@@ -1,0 +1,86 @@
+@import '../shared/css/constants.scss';
+
+div.top {
+  display: block;
+  height: 30px;
+  padding: 0px;
+  border-bottom: 3px solid burlywood;
+  background-color: rgba(0,0,0,0.3);
+
+  div {
+    margin: 0 auto;
+    // max-width: $maxWidth;
+    height: 100%;
+    // padding-top: 1px;
+    div.left {
+      display: inline-block;
+      vertical-align: middle;
+
+      a {
+        font-size: 21px;
+        color: white;
+        text-decoration: none;
+      }
+    }
+
+    div.right {
+      float: right;
+
+      a {
+        font-size: 21px;
+        color: white;
+        text-decoration: none;
+        text-transform: uppercase;
+      }
+
+      span.sep {
+        font-size: 21px;
+        color: white;
+        margin-left: 30px;
+        margin-right: 30px;
+      }
+
+      span.welcome {
+        color: white;
+        font-size: 16px;
+        vertical-align: middle;
+      }
+
+      button {
+        background-color: #333;
+        border: 1px solid #444;
+        color: white;
+        height: 100%;
+        text-transform: uppercase;
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+ul.list {
+  margin: 0px;
+  /* width: 100%; */
+  text-align: center;
+  font-size: 40px;
+}
+
+  ul.list li {
+    display: inline-block;
+    text-transform: uppercase;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    color: white;
+    margin-left: 8px;
+  }
+
+    ul.list li::after {
+      content: "";
+      /* border: white solid; */
+      border-left: 1px solid white;
+      border-right: 1px solid gray;
+      height: 35px;
+      width: 1px;
+      position: absolute;
+      margin-left: 8px;
+      margin-top: -2px;
+    }

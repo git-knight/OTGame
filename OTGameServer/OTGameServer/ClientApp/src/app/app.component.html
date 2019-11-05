@@ -1,0 +1,10 @@
+<div *ngIf="this.router.url === '/game'; else index">
+  <router-outlet></router-outlet>
+</div>
+
+<ng-template #index>
+  <app-nav-menu></app-nav-menu>
+  <div class='container'>
+    <router-outlet></router-outlet>
+  </div>
+</ng-template>

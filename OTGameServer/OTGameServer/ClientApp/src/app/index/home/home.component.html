@@ -1,0 +1,86 @@
+<div class="block max-width">
+  <h1>Welcome to TGame!</h1>
+
+  <div class="play" *ngIf="userService.loggedIn; else loginForm">
+    <!--hello {{ userService.displayName }}!<br />-->
+    <button routerLink="/game">PLAY</button>
+  </div>
+
+  <ng-template #loginForm style="width:500px">
+    <div class="block-3">
+      <form #fl="ngForm" novalidate (ngSubmit)="doSignIn(fl)">
+        <input type="email" id="email" name="email" placeholder="email" class="sign-in" ngModel />
+        <input type="password" id="password" name="password" placeholder="password" class="sign-in" ngModel />
+        <button type="submit" class="sign-in" [disabled]="isRequesting">Sign In</button>
+        <span *ngIf="isRequesting">Loading...</span>
+      </form>
+    </div>
+
+    <div class="block-3">
+      <form #fr="ngForm" (ngSubmit)="registerUser(fr)">
+        <h3>Registration</h3>
+
+        <input id="email" type="email" name="email" placeholder="Email" class="sign-in" required validateEmail ngModel />
+        <input id="nick" type="text" name="nick" placeholder="Nickname" class="sign-in" required tmFocus ngModel />
+        <input id="pwd" type="password" name="pwd" placeholder="Password" class="sign-in" required ngModel />
+        <input id="pwd2" type="password" name="pwd2" placeholder="Password again" class="sign-in" required ngModel />
+
+        <button type="submit" class="sign-in" [disabled]="fr.invalid || isRequesting">Sign Up</button>
+        <span *ngIf="errorMessage !== ''" class="errorMessage">Oops! {{ errorMessage }}</span>
+      </form>
+    </div>
+
+  </ng-template>
+
+  <div class="block-3">
+    <form #fmap="ngForm" (ngSubmit)="createMap(fmap)">
+      <h3>Create a map</h3>
+
+      <input id="name" name="name" placeholder="map title" type="text" class="sign-in" required ngModel />
+      <input id="width" name="width" placeholder="width" type="number" min="1" max="60" class="sign-in" required ngModel />
+      <input id="height" name="height" placeholder="height" type="number" min="1" max="60" class="sign-in" required ngModel />
+      <input id="data" name="data" placeholder="raw data" type="text" class="sign-in" required ngModel />
+      <button type="submit" class="sign-in">Create</button>
+    </form>
+  </div>
+
+  <div class="block-3">
+    <form #fmap="ngForm" (ngSubmit)="buildMap(fmap)">
+      <h3>Create a map</h3>
+
+      <input id="name" name="name" placeholder="map title" type="text" class="sign-in" required ngModel />
+      <button type="submit" class="sign-in">Build</button>
+    </form>
+  </div>
+
+
+  <div class="block-3">
+    <form #fmonster="ngForm" (ngSubmit)="createMonster(fmonster)">
+      <h3>Create a monster</h3>
+
+      <select name="typeid" ngModel>
+        <option *ngFor="let type of monsterTypes" value="{{getIdOf(type)}}">{{type}}</option>
+      </select>
+      <select name="mapid" ngModel>
+        <option *ngFor="let map of maps" value="{{getIdOf(map)}}">{{map}}</option>
+      </select>
+      <input id="x" name="x" placeholder="X" type="number" min="0" max="60" class="sign-in" required ngModel />
+      <input id="y" name="y" placeholder="Y" type="number" min="0" max="60" class="sign-in" required ngModel />
+      <button type="submit" class="sign-in">Create</button>
+    </form>
+  </div>
+
+
+  <div class="block-3">
+    <form #fmonsterType="ngForm" (ngSubmit)="createMonsterType(fmonsterType)">
+      <h3>Create monster type</h3>
+
+      <input id="name" name="name" placeholder="name" type="text" class="sign-in" required ngModel />
+      <input id="level" name="level" placeholder="level" type="number" min="1" max="60" class="sign-in" required ngModel />
+      <input id="attack" name="attack" placeholder="attack" type="number" min="1" max="100" class="sign-in" required ngModel />
+      <input id="defense" name="defense" placeholder="defense" type="number" min="1" max="100" class="sign-in" required ngModel />
+      <input id="hp" name="hp" placeholder="hp" type="number" min="1" max="1000" class="sign-in" required ngModel />
+      <button type="submit" class="sign-in">Create</button>
+    </form>
+  </div>
+</div>

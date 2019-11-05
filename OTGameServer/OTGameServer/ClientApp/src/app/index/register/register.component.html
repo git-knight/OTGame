@@ -1,0 +1,12 @@
+<div>
+  <h3>Registration</h3>
+
+  <form #f="ngForm" (ngSubmit)="registerUser(f)">
+    <input id="email" type="text" name="email" placeholder="Email" required validateEmail ngModel />
+    <input id="nick" type="text" name="nick" placeholder="Nickname" required tmFocus ngModel />
+    <input id="pwd" type="password" name="pwd" placeholder="Password" required ngModel />
+    <input id="pwd2" type="password" name="pwd2" placeholder="Password again" required ngModel />
+
+    <button type="submit" [disabled]="f.invalid || isRequesting">Sign Up</button>
+  </form>
+</div>
