@@ -28,11 +28,6 @@ namespace TGame.Entities
             Location = new Point(data["Location"]);
         }
 
-        public override void OnBattleJoined(Battle battle)
-        {
-            HP_Current = BaseStats.Health;
-        }
-
         public override object ToClient()
         {
             return new

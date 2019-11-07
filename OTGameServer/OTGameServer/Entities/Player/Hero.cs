@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Threading;
-using Microsoft.AspNetCore.Identity;
 using TGame.Match3;
 
 namespace TGame.Entities
@@ -50,13 +46,6 @@ namespace TGame.Entities
             => Inventory.Select(x => !x.IsEquipped ? 0 : (x.Type as Equipment)?.Stats[stat] ?? 0).Sum();
 
 
-        public override void OnBattleFinished()
-        {
-            TotalPlays++;
-            CurrentBattle = null;
-        }
-
-
         public int GetKillCounter(int monsterType) 
             => Statistics.FirstOrDefault(s => s.StatType == StatisticsType.MonsterKillCounter && s.ClassId == monsterType)?.Counter ?? 0;
 
@@ -84,8 +73,11 @@ namespace TGame.Entities
         public override void OnBattleJoined(Battle battle)
         {
             CurrentBattle = battle;
-            HP_Current = HP_Current;
-            HealingStartedAt = null;
+        }
+        public override void OnBattleFinished()
+        {
+            TotalPlays++;
+            CurrentBattle = null;
         }
 
         public override object ToClient()

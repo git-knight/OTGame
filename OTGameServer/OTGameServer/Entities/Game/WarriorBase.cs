@@ -45,12 +45,19 @@ namespace TGame.Entities
 
         public virtual int CalculateStatIncrease(StatName stat) => 0;
 
-        public abstract void OnBattleJoined(Battle battle);
-        public virtual void OnBattleFinished()
+        public void StartHealthRegen()
         {
             HealingStartedWith = Math.Max(0, HP_Current);
             HealingStartedAt = DateTime.UtcNow;
         }
+        public void StopHealthRegen()
+        {
+            HealingStartedWith = HP_Current;
+            HealingStartedAt = null;
+        }
+
+        public virtual void OnBattleJoined(Battle battle) { }
+        public virtual void OnBattleFinished() { }
 
         public abstract object ToClient();
         public abstract object ToClient_Battle();

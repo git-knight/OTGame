@@ -20,10 +20,12 @@ namespace TGame
             var battle = new Battle(inv, opps);
 
             battles.Add(battle);
-            foreach (var pl in battle.Players)
+            foreach (var pl in battle.Players) 
+            {
+                pl.StopHealthRegen();
+
                 if (pl is Hero player)
                 {
-                    //await Clients.Group(CurrentPlayer.Map.GroupName).BattleStarted(CurrentPlayer.Location, CurrentBattle.PlayerNames);
                     await hubContext.Clients.Group(player.Map.GroupName).SendAsync("InvokeMethod", "Map.BattleStarted", player.Location, battle.PlayerNames);
 
                     await hubContext.Groups.RemoveFromGroupAsync(player.Connections.First(), player.Map.GroupName);
@@ -31,9 +33,9 @@ namespace TGame
                     await hubContext.Groups.AddToGroupAsync(player.Connections.First(), battle.GroupName);
                     await hubContext.Groups.AddToGroupAsync(player.Connections.First(), battle.Board.GroupName);
 
-                    //await Clients.Group(CurrentBattle.Board.GroupName).BattleJoined(CurrentPlayer.Location, CurrentBattle.ToClient(CurrentPlayer.UserName));
                     await hubContext.Clients.Group(battle.Board.GroupName).SendAsync("InvokeMethod", "BattleJoined", battle.ToClient(player.Name));
                 }
+            }
 
             Board board = battle.Board;
             board.Timer = new System.Timers.Timer(2500 * 1000);
@@ -46,7 +48,6 @@ namespace TGame
             await Groups.AddToGroupAsync(Context.ConnectionId, CurrentBattle.GroupName);
             await Groups.AddToGroupAsync(Context.ConnectionId, CurrentBattle.Board.GroupName);
 
-            //await Clients.Group(CurrentPlayer.UserName).BattleJoined(CurrentPlayer.Location, CurrentBattle.ToClient(CurrentPlayer.UserName));
             await Clients.Group(CurrentPlayer.Name).SendAsync("InvokeMethod", "BattleJoined", CurrentBattle.ToClient(CurrentPlayer.Name));
         }
 
@@ -118,87 +119,78 @@ namespace TGame
             //await Clients.Group(board.GroupName).BattleTurnFinished(point, isVertical, new { dmgSelf = damage[0], dmgEnemy = damage[1] });
 
 
-            WarriorBase[] players = { board.PlayerLeft, board.PlayerRight };
-            if (players.Any(p => p.HP_Current <= 0)) 
+            WarriorBase[] battlers = { board.PlayerLeft, board.PlayerRight };
+            if (battlers.Any(p => p.HP_Current <= 0)) 
             {
                 using (var gameContext = new GameContext())
                 {
                     board.Finished = true;
 
                     await hubContext.Clients
-                        .Group(players[0].Map.GroupName)
-                        .SendAsync("InvokeMethod", "Map.BattleFinished", players[0].Location);
+                        .Group(battlers[0].Map.GroupName)
+                        .SendAsync("InvokeMethod", "Map.BattleFinished", battlers[0].Location);
 
+                    var deadPlayers = battlers.Where(x => x.HP_Current <= 0).ToArray();
 
-                    foreach (var pl in players)
+                    foreach (var battler in battlers)
+                        battler.StartHealthRegen();
+
+                    foreach (Hero player in battlers)
                     {
-                        if (pl is Hero winner)
+                        gameContext.Attach(player);
+
+                        var enemy = battlers[0] == player ? battlers[1] : battlers[0];
+
+                        int exp = -1;
+                        int money = 0;
+
+                        if (!deadPlayers.Contains(player))
                         {
-                            gameContext.Attach(winner);
+                            exp = 10;
+                            money = RNG.Next(7, 15);
 
-                            var enemy = players[0] == pl ? players[1] : players[0];
-
-                            int exp = -1;
-                            int money = 0;
-
-                            if (winner.HP_Current > 0)
+                            player.Money += money;
+                            player.Exp += exp;
+                            player.TotalWins++;
+                            if (enemy is Monster monster)
                             {
-                                exp = 10;
-                                money = RNG.Next(7, 15);
-
-                                winner.Money += money;
-                                winner.Exp += exp;
-                                winner.TotalWins++;
-                                if (enemy is Monster monster)
+                                var stats = player.Statistics.FirstOrDefault(s => s.StatType == StatisticsType.MonsterKillCounter && s.ClassId == monster.Type.Id);
+                                if (stats == null)
                                 {
-                                    var stats = winner.Statistics.FirstOrDefault(s => s.StatType == StatisticsType.MonsterKillCounter && s.ClassId == monster.Type.Id);
-                                    if (stats == null)
+                                    stats = new PlayerStatistics
                                     {
-                                        stats = new PlayerStatistics
-                                        {
-                                            ClassId = monster.Type.Id,
-                                            HeroId = winner.Id,
-                                            StatType = StatisticsType.MonsterKillCounter,
-                                            Counter = 0
-                                        };
-                                        gameContext.PlayerStatistics.Add(stats);
-                                    }
-                                    stats.Counter++;
+                                        ClassId = monster.Type.Id,
+                                        HeroId = player.Id,
+                                        StatType = StatisticsType.MonsterKillCounter,
+                                        Counter = 0
+                                    };
+                                    gameContext.PlayerStatistics.Add(stats);
                                 }
-
-                                await PlayerReceivedExperience(winner);
+                                stats.Counter++;
                             }
 
-                            winner.OnBattleFinished();
-
-                            if (await CheckPlayerLeft(winner))
-                                continue;
-
-                            foreach (var conn in winner.Connections)
-                                await hubContext.Groups.AddToGroupAsync(conn, winner.Map.GroupName);
-
-                            await hubContext.Clients.Group(winner.Name).SendAsync("InvokeMethod", "BattleFinished",
-                                new
-                                {
-                                    exp,
-                                    money,
-                                    health = winner.HP_Current
-                                },
-                                GetInitialDataForPlayer(winner)
-                            );
-                            /*
-                            await Clients.Group(winner.Name).BattleFinished(
-                                new
-                                {
-                                    exp,
-                                    money
-                                }, 
-                                GetInitialDataForPlayer(winner)
-                            );//*/
-
-
+                            await PlayerReceivedExperience(player);
                         }
+
+                        if (await CheckPlayerLeft(player))
+                            continue;
+
+                        foreach (var conn in player.Connections)
+                            await hubContext.Groups.AddToGroupAsync(conn, player.Map.GroupName);
+
+                        await hubContext.Clients.Group(player.Name).SendAsync("InvokeMethod", "BattleFinished",
+                            new
+                            {
+                                exp,
+                                money,
+                                health = player.HP_Current
+                            },
+                            GetInitialDataForPlayer(player)
+                        );
                     }
+
+                    foreach (var battler in battlers)
+                        battler.OnBattleFinished();
 
                     battles.Remove(board.Battle);
                     await gameContext.SaveChangesAsync();

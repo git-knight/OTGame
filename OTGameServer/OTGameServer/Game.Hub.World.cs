@@ -34,40 +34,7 @@ namespace TGame
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, CurrentPlayer.Map.GroupName);
             await Clients.Caller.SendAsync("InvokeMethod", "LoadLevel", GetInitialDataForPlayer(CurrentPlayer));
-            //await Clients.Caller.LoadLevel(GetInitialDataForPlayer(CurrentPlayer));
         }
-
-        /*
-        public async Task UpdatePlayerCoord(float X, float Y)
-        {
-            if (CurrentBattle != null)
-                return;
-
-            CurrentPlayer.Location = new Vector2(X, Y);
-
-            WarriorBase[] hitOpp = ((IEnumerable<WarriorBase>)CurrentPlayer.Map.Monsters
-                .Where(b => CurrentPlayer.Hits(b)))
-                .Concat(
-                    playersOnline.Values
-                    .Where(x => x.Id != CurrentPlayer.Id 
-                        && x.MapId == CurrentPlayer.MapId 
-                        && x.Location == CurrentPlayer.Location)
-                ).ToArray();
-
-            if (hitOpp.Length > 0)
-            {
-                await StartBattle(hitOpp, CurrentPlayer);
-                return;
-            } 
-
-            await Task.Delay(200);
-            await Clients.Caller.SendAsync("InvokeMethod", "Map.ServerTick", 
-                playersOnline.Values.Select(p => new {
-                    p.Name,
-                    p.Location
-                }).ToArray());
-        }
-        */
 
         public async Task DoPlayerMove(int direction)
         {
@@ -80,7 +47,7 @@ namespace TGame
 
             await gameContext.SaveChangesAsync();
 
-            WarriorBase[] hitOpp = ((IEnumerable<WarriorBase>)CurrentPlayer.Map.Monsters.Where(b => b.Location == CurrentPlayer.Location)).Concat(playersOnline.Values.Where(x => x.Id != CurrentPlayer.Id && x.MapId == CurrentPlayer.MapId && x.Location == CurrentPlayer.Location)).ToArray();
+            WarriorBase[] hitOpp = ((IEnumerable<WarriorBase>)CurrentPlayer.Map.Monsters.Where(b => b.IsAlive && b.Location == CurrentPlayer.Location)).Concat(playersOnline.Values.Where(x => x.Id != CurrentPlayer.Id && x.MapId == CurrentPlayer.MapId && x.Location == CurrentPlayer.Location)).ToArray();
             if (hitOpp.Length > 0)
                 await StartBattle(hitOpp, CurrentPlayer);
             else await Clients.Group(CurrentPlayer.Map.GroupName).SendAsync("InvokeMethod", "Map.Players#p-" + CurrentPlayer.Name + ".Moved", CurrentPlayer.Location);
@@ -90,8 +57,6 @@ namespace TGame
         {
             return new
             {
-                //myName = player.UserName,
-                //myHealthCurrent = player.HP_Current,
                 map = player.Map.ToClient(player),
                 players = playersOnline.Where(p => p.Value.MapId == player.MapId).Select(p => p.Value.ToClient()).ToArray()
             };
