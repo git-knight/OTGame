@@ -40,7 +40,8 @@ namespace TGame
             Board board = battle.Board;
             board.Timer = new System.Timers.Timer(2500 * 1000);
             board.Timer.Elapsed += async (a, b) => await LoseMove(board);
-            StartTurnTimer(board);
+            
+            await OnTurnStarted(board);
         }
 
         private async Task RejoinBattle()
@@ -57,17 +58,22 @@ namespace TGame
             board.TurnStartedAt = DateTime.UtcNow;
         }
 
+        static private async Task OnTurnStarted(Board board)
+        {
+            while (!board.Finished && board.CurrentPlayer is Monster)
+                await DoAIMove(board);
+
+            if (!board.Finished)
+                StartTurnTimer(board);
+        }
+
         static public async Task LoseMove(Board board)
         {
             MoveResult res = MoveResult.Invalid;
             ApplyMoveResult(board, ref res);
             await hubContext.Clients.Group(board.GroupName).SendAsync("InvokeMethod", "Battle.Board.OnActionPerformed", new Point(-1, -1), true, res.ToPlayer(board.Turn));
 
-            while (!board.Finished && board.CurrentPlayer is Monster)
-                await DoAIMove(board);
-
-            if (!board.Finished)
-                StartTurnTimer(board);
+            await OnTurnStarted(board);
         }
 
         public async Task DoBoardMove(Point point, bool isVertical)
@@ -86,11 +92,8 @@ namespace TGame
             await Clients.Group(CurrentBoard.GroupName).SendAsync("InvokeMethod", "Battle.Board.OnActionPerformed", point, isVertical, res.ToPlayer(CurrentBoard.Turn));
             await FinishTurn(CurrentBoard);
 
-            while (CurrentBattle != null && CurrentBoard.CurrentPlayer is Monster)
-                await DoAIMove(CurrentBoard);
-
             if (CurrentBattle != null)
-                StartTurnTimer(CurrentBoard);
+                await OnTurnStarted(CurrentBoard);
         }
 
         public async Task UseSkill(int id)
@@ -107,11 +110,7 @@ namespace TGame
             await Clients.Group(CurrentBoard.GroupName).SendAsync("InvokeMethod", "Battle.Board.OnSkillUsed", id, moveResult.ToPlayer(CurrentBoard.Turn));
             await FinishTurn(CurrentBoard);
 
-            while (CurrentBattle != null && CurrentBoard.CurrentPlayer is Monster)
-                await DoAIMove(CurrentBoard);
-
-            if (CurrentBattle != null)
-                StartTurnTimer(CurrentBoard);
+            await OnTurnStarted(CurrentBoard);
         }
 
         static private async Task FinishTurn(Board board)
@@ -135,7 +134,7 @@ namespace TGame
                     foreach (var battler in battlers)
                         battler.StartHealthRegen();
 
-                    foreach (Hero player in battlers)
+                    foreach (Hero player in battlers.OfType<Hero>())
                     {
                         gameContext.Attach(player);
 

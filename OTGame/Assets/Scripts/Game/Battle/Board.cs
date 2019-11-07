@@ -451,7 +451,7 @@ public class Board : MonoBehaviour
         players[(turn % 2) ^ myId].Health -= _actionResult["dmgSelf"].AsInt.Value;
         players[(turn % 2) ^ 1 ^ myId].Health -= _actionResult["dmgEnemy"].AsInt.Value;
 
-        players[turn % 2].Stones = players[turn % 2].Stones.Zip(_actionResult["colors"].AsArray, (a, b) => a + b.AsInt.Value).ToArray();
+        players[(turn % 2) ^ myId].Stones = players[(turn % 2) ^ myId].Stones.Zip(_actionResult["colors"].AsArray, (a, b) => a + b.AsInt.Value).ToArray();
 
         var wasMyTurn = isMyTurn;
         turn = _actionResult["turn"].AsInt.Value;
