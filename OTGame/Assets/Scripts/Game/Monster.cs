@@ -8,17 +8,6 @@ public class Monster : Unit
 {
     public int Level { get; set; }
 
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     internal void Init(int id, MonsterType monster)
     {
         Id = id;

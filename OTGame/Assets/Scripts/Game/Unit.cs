@@ -11,7 +11,7 @@ public class Unit : MonoBehaviour
     public string Name;
     public string Key { get; internal set; }
 
-    public PointHex CoordHex { get; set; }
+    public PointHex CoordHex;
     public Vector2Int Coord { get => CoordHex.ToPoint(); set { CoordHex = value; } }
     public Vector2Int ServerCoord { get; set; }
 

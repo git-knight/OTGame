@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using NotSoSimpleJSON;
@@ -10,11 +10,23 @@ public class Map : MonoBehaviour
 
     private PlayerController playerController;
     private GameObject mapSprite;
+    private SpriteRenderer mapCursor;
 
     public Dictionary<string, Unit> Players { get; set; }
+    
+    private MapModel MapModel => mapSprite.GetComponent<MapModel>();
+    private IEnumerable<Monster> Monsters => Magic.ChildrenOf<Monster>(mapSprite.transform);
+    private IEnumerable<Unit> QuestUnits => GetQuestUnits();
 
     void Start()
     {
+        mapCursor = transform.Find("mapCursor").GetComponent<SpriteRenderer>();
+    }
+
+    public void UpdateMapCursor(Sprite sprite, PointHex coord)
+    {
+        mapCursor.sprite = sprite;
+        mapCursor.transform.position = coord.ToScreenPointCentered();
     }
 
     void UnloadLevel()
@@ -58,68 +70,35 @@ public class Map : MonoBehaviour
 
             return unit;
         }).ToDictionary(u => u.Key);
-        //  mapSprite = Instantiate(transform.Find("MapSprite").gameObject, transform);
-        //mapSprite.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Maps/" + name);
-        /*
-        var edges = map["edges"].AsArray.Select(e => {
-            var edgeObj = new GameObject("edge", typeof(EdgeCollider2D), typeof(Rigidbody2D));
-            edgeObj.transform.SetParent(transform);
 
-            var rb = edgeObj.GetComponent<Rigidbody2D>();
-            rb.bodyType = RigidbodyType2D.Static;
-
-            var edge = edgeObj.GetComponent<EdgeCollider2D>();
-            edge.transform.position = e["position"].ToVecF();
-            edge.points = e["points"].AsArray.Select(p=>p.ToVecF()).ToArray();
-
-            return edgeObj;
-        }).ToArray();
-        units = world["players"].AsArray.Concat(map["monsters"].AsArray)
-            .Select(u => {
-                var unitObj = Instantiate(UnitPrefab, transform, false);
-                unitObj.transform.position = new Vector3((float)u["location"]["x"].AsDouble.Value, (float)u["location"]["y"].AsDouble.Value, 0); // .AsInt.Value/64f*40-20
-                
-                Unit unit;
-                if (u["id"].IsEmpty) {
-                    unit = unitObj.AddComponent<Unit>();
-                    unit.Key = "p-" + u["name"].AsString;
-                }
-                else 
-                {
-                    unit = unitObj.AddComponent<Monster>();
-                    unit.Key = "m-" + u["id"].AsInt;
-                }
-                unitObj.name = unit.Name = unit.Key;
-
-                return unit;
-            }).ToDictionary(u => u.Key);
-
-        */
         playerController.Player = Players["p-" + GameWorld.PlayerData.Name];
-
-        // GameHub.Invoke("UpdatePlayerCoord", 
-        //     playerController.Player.transform.position.x, 
-        //     playerController.Player.transform.position.y);
+        playerController.Player.GetComponent<SpriteRenderer>().sortingOrder = 7;
     }
 
-    // public void ServerTick(JSONArray players)
-    // {
-    //     var myCoord = playerController.Player.transform.position;
+    public void MonsterRespawned(int id)
+    {
+        foreach(var m in Monsters)
+            m.gameObject.SetActive(true);
+    }
 
-    //     foreach(var plData in players)
-    //     {
-    //         Unit player;
-    //         if (!units.TryGetValue("p-" + plData["name"].AsString, out player))
-    //             return;
 
-    //         if (player == playerController.Player)
-    //             continue;
-                
-    //         player.transform.position = plData["location"].ToVecF();
-    //     }
+    public bool IsBlocked(PointHex pt, bool checkMonsters = false) => IsBlocked(pt.ToPoint(), checkMonsters);
 
-    //     GameHub.Invoke("UpdatePlayerCoord", 
-    //         myCoord.x, 
-    //         myCoord.y);
-    // }
+    public bool IsBlocked(Vector2Int pt, bool checkMonsters = false)
+    {
+        return pt.x < 0 || pt.y < 0 || pt.x >= MapModel.Width || pt.y >= MapModel.Height || MapModel.Passability[pt.y * MapModel.Width + pt.x] == 0 || checkMonsters && (Monsters.Any(m => m.Coord == pt) || Players.Values.Any(p => p.Coord == pt) || QuestUnits.Any(q => q.Coord == pt));
+    }
+
+
+    public Monster TryGetMonster(PointHex pt)
+    {
+        return Monsters.FirstOrDefault(m => m.CoordHex == pt);
+    }
+
+    private IEnumerable<Unit> GetQuestUnits()
+    {
+        foreach(var el in Magic.ChildrenOf<Unit>(mapSprite.transform))
+            if (el.name.StartsWith("u-"))
+                yield return el;
+    }
 }

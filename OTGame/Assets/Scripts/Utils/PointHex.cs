@@ -5,6 +5,7 @@ using static System.Math;
 
 using Point = UnityEngine.Vector2Int;
 
+[Serializable]
 public struct PointHex
 {
     public int x, y, z;

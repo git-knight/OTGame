@@ -1,10 +1,19 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+
+[Serializable]
+public class MapCursorSpritePack
+{
+    public Sprite green;
+    public Sprite red;
+    public Sprite fight;
+}
 
 public class PlayerController : MonoBehaviour
 {
+    public MapCursorSpritePack cursorSprites;
+
     public Unit Player { get; set; }
     private Map Map { get { return Player.transform.parent.parent.GetComponent<Map>(); } }
     private MapModel MapModel { get { return Player.transform.parent.GetComponent<MapModel>(); } }
@@ -17,10 +26,12 @@ public class PlayerController : MonoBehaviour
             return;
         
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out var hit) && hit.transform.GetComponent<Map>() != null)
+        if (Physics.Raycast(ray, out var hit) && hit.transform.GetComponent<Map>() != null && !EventSystem.current.IsPointerOverGameObject())
         {
+            var hitCoord = PointHex.FromScreenCoordCentered(hit.point);
+            Map.UpdateMapCursor(Map.TryGetMonster(hitCoord)!=null ? cursorSprites.fight : (Map.IsBlocked(hitCoord) ? cursorSprites.red : cursorSprites.green), hitCoord);
             if (Input.GetMouseButton(0))
-                movementTarget = PointHex.FromScreenCoordCentered(hit.point);
+                movementTarget = hitCoord;
         }
 
         var cameraMoveTo = Player.transform.position - Camera.main.transform.forward * 430;
@@ -36,23 +47,6 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-
-    /*
-    Monster TryGetMonster(Vector2Int pt)
-    {
-        foreach (var monster in Map.Monsters)
-            if (monster.Location == pt)
-                return monster;
-
-        return null;
-    }
-    */
-    bool IsBlocked(Vector2Int pt, bool checkMonsters = false)
-    {
-        return pt.x < 0 || pt.y < 0 || pt.x >= MapModel.Width || pt.y >= MapModel.Height || MapModel.Passability[pt.y * MapModel.Width + pt.x] == 0;// || checkMonsters && (Monsters.Any(m => m.Location == pt) || Players.Values.Any(p => p.Location == pt) || QuestObjects.Any(q => q.Location == pt));
-    }
-
-
 
 
     static PointHex[] directions = {
@@ -89,7 +83,7 @@ public class PlayerController : MonoBehaviour
                         if (visited[(nextPt + directions[j]).ToIndex(MapModel.Width)] >= visited[nextPt.ToIndex(MapModel.Width)])
                             continue;
 
-                        if (IsBlocked((nextPt + directions[j]).ToPoint(), false))
+                        if (Map.IsBlocked(nextPt + directions[j], false))
                             continue;
 
                         Vector3 nextLoc = (nextPt + directions[j]).ToScreenPoint();
@@ -104,7 +98,7 @@ public class PlayerController : MonoBehaviour
                     return closestCellIdx;
                 }
 
-                if (!IsBlocked(nextPt.ToPoint(), true) && visited[nextPt.ToIndex(MapModel.Width)] == 10000)
+                if (!Map.IsBlocked(nextPt, true) && visited[nextPt.ToIndex(MapModel.Width)] == 10000)
                 {
                     q[q1++] = nextPt;
                     visited[nextPt.ToIndex(MapModel.Width)] = visited[pt.ToIndex(MapModel.Width)] + 1;

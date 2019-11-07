@@ -62,9 +62,6 @@ public class DataContext : MonoBehaviour
             ItemTypes = ChildrenOf<ItemType>("ItemTypes").Select(m => m.ToModel()),
             Maps = ChildrenOf("Maps").Select(m => ToModel(m))
         }).Serialize());
-
-        //foreach (var map in )
-        //    File.WriteAllText("../Data/Maps/" + map.name + ".txt", JSON.FromData(ToModel(map)).Serialize());
     }
         
     public object ToModel(GameObject map)
@@ -98,10 +95,12 @@ public class DataContext : MonoBehaviour
         {
             var monsterObj = Instantiate(monster, clientMap.transform);
             monsterObj.name = "m-" + (monsterCounter++);
-            monsterObj.transform.position = PointHex.Round(monster.transform.position);
 
             var monsterData = monsterObj.gameObject.AddComponent<Monster>();
             monsterData.Init(monsterId++, monster);
+
+            monsterData.CoordHex = PointHex.FromScreenCoord(monster.transform.position);
+            monsterObj.transform.position = monsterData.CoordHex.ToScreenPoint();
 
             DestroyImmediate(monsterObj.GetComponent<MonsterType>());
         }
@@ -110,9 +109,11 @@ public class DataContext : MonoBehaviour
         {
             var unitObj = Instantiate(questUnit.transform.Find("View"), clientMap.transform);
             unitObj.name = "u-" + questUnit.name;
-            unitObj.transform.position = PointHex.Round(questUnit.transform.position); 
+
+            var unit = unitObj.gameObject.AddComponent<Unit>();
+            unit.CoordHex = PointHex.FromScreenCoord(questUnit.transform.position);
+            unitObj.transform.position = unit.CoordHex.ToScreenPoint();
         }
-        //AssetDatabase.LoadAllAssetsAtPath()
         PrefabUtility.SaveAsPrefabAsset(clientMap, "Assets/Resources/Maps/" + map.name + ".prefab");
         DestroyImmediate(clientMap);
 
@@ -120,11 +121,6 @@ public class DataContext : MonoBehaviour
         {
             Name = map.name,
             Passability = new string(map.GetComponent<MapModel>().Passability.Select(x => (char)('0' + x)).ToArray()),
-            /*Edges = ChildrenOf<EdgeCollider2D>(map.transform).Select(e => new
-            {
-                position = (Vector2)e.transform.position,
-                e.points
-            }),*/
             Monsters = ChildrenOf<MonsterType>(map.transform).Select(m => new
             {
                 TypeId = m.Id,

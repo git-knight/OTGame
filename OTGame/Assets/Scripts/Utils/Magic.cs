@@ -75,6 +75,15 @@ static class Magic
     static public Vector2 ToVecF(this JSONNode node) 
         => new Vector2((float)node["x"].AsDouble.Value, (float)node["y"].AsDouble.Value);
 
+    static public IEnumerable<T> ChildrenOf<T>(Transform obj)
+    {
+        foreach (Transform child in obj)
+        {
+            if (child.TryGetComponent<T>(out var component))
+                yield return component;
+        }
+    }
+
     static public object FollowPath(object source, string path, bool returnRef)
     {
         if (!returnRef)
