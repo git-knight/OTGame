@@ -29,6 +29,8 @@ namespace TGame
                 player.BaseStats += LevelupStats;
                 player.HP_Current += LevelupStats.Health;
 
+                player.Stats.Invalidate();
+
                 await hubContext.Clients.Group(player.Name).SendAsync("InvokeMethod", "PlayerLeveledUp", new {
                     player.Level,
                     player.Exp,
@@ -88,6 +90,8 @@ namespace TGame
                 gameContext.Attach(item);
                 item.IsEquipped = true;
 
+                CurrentPlayer.Stats.Invalidate();
+
                 await gameContext.SaveChangesAsync();
 
                 await Clients.Caller.SendAsync("InvokeMethod", "ActiveViewScript.OnItemEquipped", id);
@@ -96,6 +100,8 @@ namespace TGame
             {
                 gameContext.Attach(item);
                 item.IsEquipped = false;
+                CurrentPlayer.Stats.Invalidate();
+
                 await gameContext.SaveChangesAsync();
                 await Clients.Caller.SendAsync("InvokeMethod", "ActiveViewScript.OnItemUnequipped", id);
             }
@@ -149,7 +155,7 @@ namespace TGame
             if (id < 0 || id >= Quests.Count())
                 return;
 
-            var quest = GameHub.Quests[id];
+            var quest = Quests[id];
 
             var questCompletion = CurrentPlayer.Quests.FirstOrDefault(q => q.QuestId == id);
             if (questCompletion == null)

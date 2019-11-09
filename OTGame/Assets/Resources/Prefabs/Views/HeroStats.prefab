@@ -151,6 +151,7 @@ MonoBehaviour:
     m_LineSpacing: 1
   m_Text: '<color=green>
 
+
     +3
 
 
@@ -312,13 +313,13 @@ MonoBehaviour:
     m_LineSpacing: 1
   m_Text: '2
 
+    3000
+
     40
 
     12
 
-    25
-
-    3000'
+    25'
 --- !u!1 &4372119455504101804
 GameObject:
   m_ObjectHideFlags: 0
@@ -456,13 +457,13 @@ MonoBehaviour:
     m_LineSpacing: 1
   m_Text: '5
 
+    3000
+
     40
 
     17
 
-    25
-
-    3000'
+    25'
 --- !u!1 &5816224656237221063
 GameObject:
   m_ObjectHideFlags: 0
@@ -541,13 +542,13 @@ MonoBehaviour:
     m_LineSpacing: 1
   m_Text: 'Level:
 
+    Experience:
+
     Health:
 
     Attack:
 
     Defense:
-
-    Experience:
 
     Min
     damage:

@@ -51,5 +51,10 @@ namespace TGame.Entities
         {
             this.owner = owner;
         }
+
+        public void Invalidate()
+        {
+            cachedStats = new int?[(int)StatName.Count];
+        }
     }
 }
