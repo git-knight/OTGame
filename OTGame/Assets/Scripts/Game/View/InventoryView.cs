@@ -52,6 +52,7 @@ public class InventoryView : MonoBehaviour
                     itemImage.GetComponent<RawImage>().texture = Resources.Load<Texture>("Sprites/Items/" + item["name"].AsString);
 
                     var equipButton = obj.Find("Unequip").GetComponent<Button>();
+                    equipButton.onClick.RemoveAllListeners();
                     equipButton.onClick.AddListener(() => { UnequipItem(item); });
                     equipButton.gameObject.SetActive(true);
 

@@ -32,7 +32,7 @@ namespace TGame.Entities
         {
             Name = (string)data["Name"];
             Price = (int)data["Price"];
-            Slot = (EquipmentSlot)(int)data["Price"];
+            Slot = (EquipmentSlot)(int)data["Slot"];
             Stats = data["Stats"].ToObject<Stats>();
         }
     }
