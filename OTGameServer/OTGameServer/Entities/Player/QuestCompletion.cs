@@ -19,22 +19,6 @@ namespace TGame.Entities
 
         [NotMapped]
         public int ActualAmount { get { return Math.Min(Task.RequiredAmount, Task.GetCounterFor(QuestCompletion.Owner, SavedAmount)); } }
-
-        public bool IsCompleted()
-        {
-            return ActualAmount >= Task.RequiredAmount;
-        }
-
-        internal object ToPlayer()
-        {
-            return new
-            {
-                statusText = Task.GetStatusString()
-                        .Replace("{current}", ActualAmount + "")
-                        .Replace("{max}", Task.RequiredAmount + ""),
-                isCompleted = IsCompleted()
-            };
-        }
     }
 
     public class QuestCompletion
@@ -51,13 +35,16 @@ namespace TGame.Entities
 
         public bool IsCompleted { get; set; }
 
+        public bool CanTurnIn() 
+            => Quest.Tasks.All(q => q.IsCompleted(this));
+
         internal object ToPlayer()
         {
             return new
             {
                 Quest.Title,
                 Quest.Description,
-                completionInfo = TaskCompletion.Select(t => t.ToPlayer()).ToArray(),
+                completionInfo = Quest.Tasks.Select(t => t.ToPlayer(this)).ToArray(),
                 IsCompleted
             };
         }

@@ -15,7 +15,7 @@ public class Map : MonoBehaviour
     public Dictionary<string, Unit> Players { get; set; }
     
     private MapModel MapModel => mapSprite.GetComponent<MapModel>();
-    private IEnumerable<Monster> Monsters => Magic.ChildrenOf<Monster>(mapSprite.transform);
+    private IEnumerable<Monster> Monsters => Magic.ChildrenOf<Monster>(mapSprite.transform).Where(m => m.gameObject.activeSelf);
     private IEnumerable<Unit> QuestUnits => GetQuestUnits();
 
     void Start()
@@ -75,10 +75,12 @@ public class Map : MonoBehaviour
         playerController.Player.GetComponent<SpriteRenderer>().sortingOrder = 7;
     }
 
+    internal bool IsUnit(PointHex coord) 
+        => QuestUnits.Any(q => q.CoordHex == coord);
+
     public void MonsterRespawned(int id)
     {
-        foreach(var m in Monsters)
-            m.gameObject.SetActive(true);
+        mapSprite.transform.Find("m-"+id)?.gameObject.SetActive(true);
     }
 
 

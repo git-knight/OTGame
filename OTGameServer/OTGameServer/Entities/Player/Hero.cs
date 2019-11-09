@@ -54,22 +54,6 @@ namespace TGame.Entities
 
 
 
-        public bool TryMoveTo(int direction)
-        {
-            PointHex[] directions =
-            {
-                new PointHex(-1, 1, 0), new PointHex(-1, 0, 1), new PointHex(0, -1, 1),
-                new PointHex(1, -1, 0), new PointHex(1, 0, -1), new PointHex(0, 1, -1)
-            };
-
-            var newLoc = LocationHex + directions[direction];
-            if (Map[newLoc.ToCoord()] == 0) 
-                return false;
-
-            LocationHex = newLoc;
-            return true;
-        }
-
         public override void OnBattleJoined(Battle battle)
         {
             CurrentBattle = battle;

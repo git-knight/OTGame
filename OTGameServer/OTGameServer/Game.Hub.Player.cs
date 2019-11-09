@@ -174,7 +174,7 @@ namespace TGame
             if (questCompletion.IsCompleted)
                 return;
 
-            if (quest.Tasks.All(c => c.IsTrueFor(CurrentPlayer)))
+            if (quest.Tasks.All(c => c.IsCompleted(questCompletion)))
             {
                 await Clients.Caller.SendAsync("InvokeMethod", "PlayerRewarded", new
                 {

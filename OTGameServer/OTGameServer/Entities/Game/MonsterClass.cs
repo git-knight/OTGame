@@ -5,7 +5,9 @@ namespace TGame.Entities
 {
     public class MonsterClass
     {
-        public int Id { get; set; }
+        private static int _idCounter = 0;
+
+        public int Id { get; set; } = _idCounter++;
 
         public string Name { get; set; }   
 

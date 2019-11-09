@@ -38,18 +38,27 @@ namespace TGame.Entities
         public Quest Quest { get; set; }
         public int RequiredAmount { get; set; }
 
-        [NotMapped]
-        public abstract bool IsStatic { get; }
+        [NotMapped] public abstract bool IsStatic { get; }
 
         public abstract int GetCounterFor(Hero player, int savedAmount);
-        public abstract bool IsTrueFor(Hero player);
         public abstract QuestTaskCompletion ToCompletionInfo(Hero player);
-
         public abstract string GetStatusString();
 
-        internal object ToPlayer()
+
+        public int ActualAmount(QuestCompletion qc) => GetCounterFor(qc.Owner, qc.TaskCompletion.FirstOrDefault(c => c.Task == this)?.SavedAmount ?? 0);
+        public bool IsCompleted(QuestCompletion qc) => ActualAmount(qc) >= RequiredAmount;
+        public bool IsCompleted(Hero hero) => IsCompleted(hero.Quests.First(q => q.Quest == Quest));
+
+
+        internal object ToPlayer(QuestCompletion qc)
         {
-            throw new NotImplementedException();
+            return new
+            {
+                statusText = GetStatusString()
+                        .Replace("{current}", Math.Min(RequiredAmount, ActualAmount(qc)) + "")
+                        .Replace("{max}", RequiredAmount + ""),
+                isCompleted = IsCompleted(qc)
+            };
         }
     }
 
@@ -72,11 +81,6 @@ namespace TGame.Entities
         public override string GetStatusString()
             => "{current}/{max} " + MonsterType.Name + "s killed";
 
-        public override bool IsTrueFor(Hero player)
-        {
-            return player.GetKillCounter(MonsterType.Id) >= RequiredAmount;
-        }
-
         public override QuestTaskCompletion ToCompletionInfo(Hero player)
         {
             return new QuestTaskCompletion
@@ -94,21 +98,14 @@ namespace TGame.Entities
 
         public override bool IsStatic => true;
 
-        public override int GetCounterFor(Hero player, int savedAmount)
-        {
-            return player.GetItemCounter(ItemId);
-        }
+        public override int GetCounterFor(Hero player, int savedAmount) 
+            => player.GetItemCounter(ItemId);
 
         public override string GetStatusString()
         {
             if (RequiredAmount > 0)
                 return "{current}/{max} " + Item.Name + " acquired";
             else return "{current}/{max} " + Item.Name + " used";
-        }
-
-        public override bool IsTrueFor(Hero player)
-        {
-            return player.Inventory.Any(i => i.TypeId == ItemId && i.Amount >= RequiredAmount);
         }
 
         public override QuestTaskCompletion ToCompletionInfo(Hero player)
@@ -164,7 +161,7 @@ namespace TGame.Entities
         public int Id { get; set; } = _idCounter++;
         public string Title { get; set; }
         public string Description { get; set; }
-        public string Dialogues { get; set; } // Hello! go kill 100 goblins|
+        public string Dialogues { get; set; }
 
         public int MapObjectId { get; set; }
 
@@ -200,7 +197,7 @@ namespace TGame.Entities
                 return QuestStatus.None;
             }
 
-            if (!completion.IsCompleted && Tasks.All(t => t.IsTrueFor(player)))
+            if (!completion.IsCompleted && completion.CanTurnIn())
                 return QuestStatus.Completed;
 
             return QuestStatus.None;

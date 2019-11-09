@@ -42,8 +42,24 @@ namespace TGame
                 return;
 
             gameContext.Attach(CurrentPlayer);
-            if (!CurrentPlayer.TryMoveTo(direction))
+            
+            PointHex[] directions =
+            {
+                new PointHex(-1, 1, 0), new PointHex(-1, 0, 1), new PointHex(0, -1, 1),
+                new PointHex(1, -1, 0), new PointHex(1, 0, -1), new PointHex(0, 1, -1)
+            };
+
+            var newLoc = CurrentPlayer.LocationHex + directions[direction];
+            if (CurrentPlayer.Map[newLoc.ToCoord()] == 0)
                 return;
+
+            if (CurrentPlayer.Map.TryGetUnit(newLoc, out MapObject unit))
+            {
+                await ShowUnitQuests(unit.Id);
+                return;
+            }
+
+            CurrentPlayer.LocationHex = newLoc;
 
             await gameContext.SaveChangesAsync();
 
@@ -74,7 +90,7 @@ namespace TGame
             await Clients.Caller.SendAsync("InvokeMethod", "ShowUnitQuests", new
             {
                 unitId,
-                quests = Quests.Select(q => q.ToPlayer(CurrentPlayer)).ToArray()
+                quests = unitQuests.Select(q => q.ToPlayer(CurrentPlayer)).ToArray()
             });
         }
     }

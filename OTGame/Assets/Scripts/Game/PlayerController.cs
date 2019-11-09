@@ -30,7 +30,7 @@ public class PlayerController : MonoBehaviour
         {
             var hitCoord = PointHex.FromScreenCoordCentered(hit.point);
             Map.UpdateMapCursor(Map.TryGetMonster(hitCoord)!=null ? cursorSprites.fight : (Map.IsBlocked(hitCoord) ? cursorSprites.red : cursorSprites.green), hitCoord);
-            if (Input.GetMouseButton(0))
+            if (Input.GetMouseButtonDown(0))
                 movementTarget = hitCoord;
         }
 
@@ -44,6 +44,11 @@ public class PlayerController : MonoBehaviour
             {
                 GameHub.Invoke("DoPlayerMove", nextDirection);
                 Player.CoordHex += directions[nextDirection];
+                if (Map.IsUnit(Player.CoordHex))
+                {
+                    Player.CoordHex -= directions[nextDirection];
+                    movementTarget = null;
+                }
             }
         }
     }

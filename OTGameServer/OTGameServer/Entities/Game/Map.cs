@@ -60,5 +60,11 @@ namespace TGame.Entities
                 battles = Battles.Select(b => b.ToMap()).ToArray()
             };
         }
+
+        internal bool TryGetUnit(PointHex newLoc, out MapObject unit)
+        {
+            unit = MapObjects.FirstOrDefault(u => u.Location == newLoc.ToCoord());
+            return unit != null;
+        }
     }
 }
