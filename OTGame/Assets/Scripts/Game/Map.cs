@@ -15,7 +15,7 @@ public class Map : MonoBehaviour
     public Dictionary<string, Unit> Players { get; set; }
     
     private MapModel MapModel => mapSprite.GetComponent<MapModel>();
-    private IEnumerable<Monster> Monsters => Magic.ChildrenOf<Monster>(mapSprite.transform).Where(m => m.gameObject.activeSelf);
+    private IEnumerable<Monster> Monsters => Utils.ChildrenOf<Monster>(mapSprite.transform).Where(m => m.gameObject.activeSelf);
     private IEnumerable<Unit> QuestUnits => GetQuestUnits();
 
     void Start()
@@ -99,7 +99,7 @@ public class Map : MonoBehaviour
 
     private IEnumerable<Unit> GetQuestUnits()
     {
-        foreach(var el in Magic.ChildrenOf<Unit>(mapSprite.transform))
+        foreach(var el in Utils.ChildrenOf<Unit>(mapSprite.transform))
             if (el.name.StartsWith("u-"))
                 yield return el;
     }

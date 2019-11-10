@@ -13,13 +13,13 @@ public class ValueBinding : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        setters = Bindings.Select(x => Magic.FollowPath(this, x.TargetPath, true) as Action<object>).ToArray();
+        setters = Bindings.Select(x => Utils.FollowPath(this, x.TargetPath, true) as Action<object>).ToArray();
     }
 
     // Update is called once per frame
     void Update()
     {
         foreach (var obj in Bindings.Zip(setters, (b, s) => new { b, s }))
-            obj.s(Magic.FollowPath(this, obj.b.SourcePath, false));
+            obj.s(Utils.FollowPath(this, obj.b.SourcePath, false));
     }
 }

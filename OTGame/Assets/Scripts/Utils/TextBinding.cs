@@ -35,6 +35,6 @@ public class TextBinding : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        text.text = values.Aggregate(TextTemplate, (t, v) => t.Replace('{' + v.Name + '}', Stringify(Magic.FollowPath(this, v.Path, false)) + ""));
+        text.text = values.Aggregate(TextTemplate, (t, v) => t.Replace('{' + v.Name + '}', Stringify(Utils.FollowPath(this, v.Path, false)) + ""));
     }
 }

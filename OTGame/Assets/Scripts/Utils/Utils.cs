@@ -60,7 +60,7 @@ class Range : IEnumerable<int>
     public IEnumerator<int> GetEnumerator() => new RangeIterator(min, max);
 }
 
-static class Magic
+static class Utils
 {
     static public Range Times(this int num)
         => new Range(num);
