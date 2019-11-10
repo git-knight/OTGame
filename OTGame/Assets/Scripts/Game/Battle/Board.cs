@@ -437,6 +437,17 @@ public class Board : MonoBehaviour
         return true;
     }
 
+    void SpawnMessage(string templateName, float pause, int? value = null)
+    {
+        var message = Instantiate(transform.parent.Find("templates/" + templateName), transform.parent);
+
+        if (value.HasValue)
+            message.GetComponent<Text>().text = message.GetComponent<Text>().text.Replace("10", "" + value);
+
+        var animator = message.GetComponent<BattleMessage>();
+        animator.Play(pause);
+    }
+
     void FinishTurn()
     {
         IsAnimating = false;
@@ -447,6 +458,18 @@ public class Board : MonoBehaviour
         //    this.swapSprites(this.spritesSwapping, () => this.isAnimating = false);
 
         //turn++;
+
+        const float deltaPause = 0.24f;
+        float pause = -deltaPause;
+
+
+        if (_actionResult["dmgSelf"].AsInt < 0)
+            SpawnMessage("healed", pause += deltaPause, -1 * _actionResult["dmgSelf"].AsInt);
+        else if (_actionResult["dmgSelf"].AsInt > 0)
+            SpawnMessage("damagedealt", pause += deltaPause, _actionResult["dmgSelf"].AsInt);
+
+        if (_actionResult["dmgEnemy"].AsInt > 0)
+            SpawnMessage("damagedealt", pause += deltaPause, _actionResult["dmgEnemy"].AsInt);
 
         players[(turn % 2) ^ myId].Health -= _actionResult["dmgSelf"].AsInt.Value;
         players[(turn % 2) ^ 1 ^ myId].Health -= _actionResult["dmgEnemy"].AsInt.Value;
@@ -461,6 +484,10 @@ public class Board : MonoBehaviour
                 UICommon.FadeOut(transform.parent.Find("boardShade").gameObject, false);
             else UICommon.FadeIn(transform.parent.Find("boardShade").gameObject);
         }
+
+        if (isMyTurn)
+            SpawnMessage("yourturn", pause += deltaPause);
+        else SpawnMessage("enemyturn", pause += deltaPause);
 
         battleTimer.Timer = 25;
         //this.turnEndsAt = new Date();

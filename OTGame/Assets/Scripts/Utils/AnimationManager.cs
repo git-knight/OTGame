@@ -49,7 +49,7 @@ public class TimeStamp
     public float GetCurrentValue(string name)
     {
         var val = valuesStart[name] + (changeSpeed[name] + changeAcceleration[name] * timeAlreadyPassed) * timeAlreadyPassed;
-        return (IsValueFinal(name, val) ? valuesEnd[name] : val).Value;
+        return IsValueFinal(name, val) ? (valuesEnd[name] ?? val) : val;
     }
 }
 
@@ -117,6 +117,9 @@ public class Motion
         }
 
         stamps.Add(stamp);
+        if (stamps.Count == 1 && valuesStart != null)
+            foreach(var prop in valuesStart.GetType().GetProperties())
+                TrySetValue(prop.Name, Convert.ToSingle(prop.GetValue(valuesStart)));
 
         return this;
     }
@@ -145,16 +148,10 @@ public class Motion
         return CurrentStamp;
     }
 
-    public IEnumerable YieldUpdate()
+    public IEnumerator<TimeStamp> Play(Action onFinished = null)
     {
         while (!IsFinished)
             yield return Update();
-    }
-
-    public IEnumerator Play(Action onFinished = null)
-    {
-        foreach (var tick in YieldUpdate())
-            yield return tick;
 
         onFinished?.Invoke();
     }
