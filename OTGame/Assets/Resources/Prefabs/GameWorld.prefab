@@ -1070,8 +1070,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8854182724656418318}
   m_HandleRect: {fileID: 1919418486327945067}
   m_Direction: 0
-  m_Value: 1
-  m_Size: 0.9999998
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2296,6 +2296,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UnitPrefab: {fileID: 4835605269691549670, guid: b85cd0682dcb471f79a09471f14529fe,
     type: 3}
+  PlayerSkins:
+  - {fileID: 1475286338648080, guid: 8db8069ae0754674c8438b689402a2a9, type: 3}
+  - {fileID: 1632069410589986, guid: 685cd4c21dc999a449ca12164c452bec, type: 3}
 --- !u!114 &8568122563944254281
 MonoBehaviour:
   m_ObjectHideFlags: 0
