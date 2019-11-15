@@ -462,19 +462,21 @@ public class Board : MonoBehaviour
         const float deltaPause = 0.24f;
         float pause = -deltaPause;
 
+        int pid0 = (turn % 2) ^ myId;
+        int pid1 = pid0 ^ 1;
 
         if (_actionResult["dmgSelf"].AsInt < 0)
             SpawnMessage("healed", pause += deltaPause, -1 * _actionResult["dmgSelf"].AsInt);
         else if (_actionResult["dmgSelf"].AsInt > 0)
-            SpawnMessage("damagedealt", pause += deltaPause, _actionResult["dmgSelf"].AsInt);
+            SpawnMessage(pid0 == 0 ? "damagetaken" : "damagedealt", pause += deltaPause, _actionResult["dmgSelf"].AsInt);
 
         if (_actionResult["dmgEnemy"].AsInt > 0)
-            SpawnMessage("damagedealt", pause += deltaPause, _actionResult["dmgEnemy"].AsInt);
+            SpawnMessage(pid0 == 1 ? "damagetaken" : "damagedealt", pause += deltaPause, _actionResult["dmgEnemy"].AsInt);
 
-        players[(turn % 2) ^ myId].Health -= _actionResult["dmgSelf"].AsInt.Value;
-        players[(turn % 2) ^ 1 ^ myId].Health -= _actionResult["dmgEnemy"].AsInt.Value;
+        players[pid0].Health -= _actionResult["dmgSelf"].AsInt.Value;
+        players[pid1].Health -= _actionResult["dmgEnemy"].AsInt.Value;
 
-        players[(turn % 2) ^ myId].Stones = players[(turn % 2) ^ myId].Stones.Zip(_actionResult["colors"].AsArray, (a, b) => a + b.AsInt.Value).ToArray();
+        players[pid0].Stones = players[pid0].Stones.Zip(_actionResult["colors"].AsArray, (a, b) => a + b.AsInt.Value).ToArray();
 
         var wasMyTurn = isMyTurn;
         turn = _actionResult["turn"].AsInt.Value;
@@ -490,17 +492,6 @@ public class Board : MonoBehaviour
         else SpawnMessage("enemyturn", pause += deltaPause);
 
         battleTimer.Timer = 25;
-        //this.turnEndsAt = new Date();
-        //this.turnEndsAt.setSeconds(this.turnEndsAt.getSeconds() + 25)
-
-        /*
-    ViewService.addMotion(this.boardFadeoutSpr, {
-        valuesStart: { alpha: this.isMyTurn ? 0.3 : 0.01 },
-      valuesEnd: { alpha: this.isMyTurn ? 0.01 : 0.3 },
-      totalTime: 0.4,
-      callback: () => this.boardFadeoutSpr.visible = !this.isMyTurn
-    })*/
-        //this.boardFadeoutSpr.visible = true
     }
 
     IEnumerable DoCombinations()
