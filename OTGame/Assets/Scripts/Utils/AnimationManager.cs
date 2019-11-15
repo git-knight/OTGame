@@ -95,6 +95,9 @@ public class Motion
         object changeSpeed = null,
         object changeAcceleration = null)
     {
+        if (totalTime.HasValue && totalTime <= 0)
+            return this;
+
         var stamp = new TimeStamp(obj);
         var prevStamp = stamps.LastOrDefault();
 
@@ -126,23 +129,32 @@ public class Motion
 
     public TimeStamp Update()
     {
-        CurrentStamp.timeAlreadyPassed += Time.deltaTime;
+        float deltaTime = Time.deltaTime;
 
-        IsFinished = CurrentStamp.totalTime == null || CurrentStamp.timeAlreadyPassed >= CurrentStamp.totalTime;
-        foreach (var prop in CurrentStamp.props)
+        while (deltaTime > 0 && !IsFinished) 
         {
-            CurrentStamp.currentValues[prop] = CurrentStamp.GetCurrentValue(prop);
-            TrySetValue(prop, CurrentStamp.currentValues[prop]);
-            IsFinished = IsFinished && CurrentStamp.IsValueFinal(prop, CurrentStamp.currentValues[prop]);
-        }
+            CurrentStamp.timeAlreadyPassed += deltaTime;
 
-        if (IsFinished)
-        {
-            if (currentId != stamps.Count - 1)
+            IsFinished = CurrentStamp.totalTime == null || CurrentStamp.timeAlreadyPassed >= CurrentStamp.totalTime;
+            foreach (var prop in CurrentStamp.props)
             {
-                IsFinished = false;
-                currentId++;
+                CurrentStamp.currentValues[prop] = CurrentStamp.GetCurrentValue(prop);
+                TrySetValue(prop, CurrentStamp.currentValues[prop]);
+                IsFinished = IsFinished && CurrentStamp.IsValueFinal(prop, CurrentStamp.currentValues[prop]);
             }
+
+            if (IsFinished)
+            {
+                if (currentId != stamps.Count - 1)
+                {
+                    if (CurrentStamp.totalTime.HasValue)
+                        deltaTime -= (CurrentStamp.totalTime.Value - (CurrentStamp.timeAlreadyPassed - deltaTime));
+
+                    IsFinished = false;
+                    currentId++;
+                }
+            }
+            else deltaTime = 0;
         }
 
         return CurrentStamp;
