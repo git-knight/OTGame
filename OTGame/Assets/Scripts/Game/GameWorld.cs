@@ -273,6 +273,8 @@ public class GameWorld : MonoBehaviour
 
         var finishBattlePopup = Instantiate(Battle.BattleFinishedPrefab);
 
+        UICommon.FadeIn(finishBattlePopup);
+
         var youWin = finishBattlePopup.transform.Find("MainPanel/YouWin").gameObject;
         var recExp = finishBattlePopup.transform.Find("MainPanel/10exp").gameObject;
         var recMoney = finishBattlePopup.transform.Find("MainPanel/10money").gameObject;
@@ -296,7 +298,8 @@ public class GameWorld : MonoBehaviour
             yield return null;
 
         Destroy(Battle.gameObject);
-        Destroy(finishBattlePopup);
+        // Destroy(finishBattlePopup);
+        UICommon.FadeOut(finishBattlePopup);
         Battle = null;
 
         LoadLevel(world);

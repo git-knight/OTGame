@@ -25,7 +25,7 @@ class UICommon : MonoBehaviour
         instance.StartCoroutine(fadein.Play(then));
     }
 
-    static public void FadeOut(GameObject gameObject, bool autoClose = true)
+    static public void FadeOut(GameObject gameObject, bool autoDestroy = true)
     {
         var fadeout = new Motion(gameObject.GetComponent<CanvasGroup>()).AddTimeStamp(
             valuesStart: new { alpha = 1 },
@@ -35,7 +35,7 @@ class UICommon : MonoBehaviour
 
         instance.StartCoroutine(fadeout.Play(() =>
         {
-            if (autoClose)
+            if (autoDestroy)
                 Destroy(gameObject);
         }));
 
