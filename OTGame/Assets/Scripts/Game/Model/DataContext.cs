@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿#if UNITY_EDITOR
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -114,6 +115,7 @@ public class DataContext : MonoBehaviour
             unit.CoordHex = PointHex.FromScreenCoord(questUnit.transform.position);
             unitObj.transform.position = unit.CoordHex.ToScreenPoint();
         }
+        
         PrefabUtility.SaveAsPrefabAsset(clientMap, "Assets/Resources/Maps/" + map.name + ".prefab");
         DestroyImmediate(clientMap);
 
@@ -153,3 +155,4 @@ public class DataContext : MonoBehaviour
         gameObject.SetActive(false);
     }
 }
+#endif

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Spriter2UnityDX;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,5 +21,8 @@ public class Fake3dView : MonoBehaviour
 
         if (TryGetComponent<SpriteRenderer>(out var sprite))
             sprite.sortingOrder = (int)(10000 - Vector3.Distance(Camera.main.transform.position, transform.position) * 10);
+
+        if (TryGetComponent<EntityRenderer>(out var entity))
+            entity.SortingOrder = (int)(10000 - Vector3.Distance(Camera.main.transform.position, transform.position) * 10);
     }
 }
