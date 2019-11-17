@@ -34,7 +34,7 @@ public class BattlerInfo
         }
         set
         {
-            hp = Mathf.Max(0, value);
+            hp = Mathf.Max(0, Mathf.Min(hpMax, value));
 
             //(view.hpline.transform as RectTransform).sizeDelta = new Vector2(13, 250 * );
             //view.hpText.text = Mathf.Floor(hp) + "/" + hpMax;
@@ -98,6 +98,8 @@ public class Board : MonoBehaviour
 
     internal void Initialize(JSONNode board)
     {
+        transform.parent.Find("templates/").gameObject.SetActive(false);
+
         var boardSize = (this.transform as RectTransform).rect;
         cellSize = new Vector2(boardSize.width / boardWidth, boardSize.height / boardHeight);
 
@@ -205,14 +207,14 @@ public class Board : MonoBehaviour
 
         {
             var animations = new List<Motion>();
-            var f = -0.1f;
+            var f = -0.065f;
             var lastX = -1;
             foreach (var cell in cells.OrderBy(c => c.coord.x).ThenByDescending(c => c.coord.y))
             {
                 if (cell.coord.x != lastX)
                 {
                     lastX = cell.coord.x;
-                    f = -0.1f;
+                    f = -0.065f;
                 }
                 cell.Y = 300 + (boardHeight - 1 - cell.coord.y) * 48;
                 animations.Add(CreateFalldownAnimation(cell, true, cell.coord.y, (f += 0.065f) + cell.coord.x * 0.007f));
@@ -437,7 +439,7 @@ public class Board : MonoBehaviour
         return true;
     }
 
-    void SpawnMessage(string templateName, float pause, int? value = null)
+    Transform SpawnMessage(string templateName, float pause, int? value = null)
     {
         var message = Instantiate(transform.parent.Find("templates/" + templateName), transform.parent);
 
@@ -446,6 +448,29 @@ public class Board : MonoBehaviour
 
         var animator = message.GetComponent<BattleMessage>();
         animator.Play(pause);
+
+        return message;
+    }
+
+    void StonesAcquiredMessage(float pause, JSONArray stones)
+    {
+        var message = SpawnMessage("stonesAcquired", pause);
+
+        for (int i = 0; i < 3; i++)
+        {
+            int count = stones[i].AsInt.Value;
+            var block = message.Find("c" + i);
+            var textValue = block.Find("Text").GetComponent<Text>();
+
+            if (count == 0)
+                block.gameObject.SetActive(false);
+            else if (count < 0)
+                textValue.color = Color.red;
+
+            textValue.text = (count < 0 ? "" : "+") + count;
+        }
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(message as RectTransform); // doesn't work without this
     }
 
     void FinishTurn()
@@ -472,6 +497,10 @@ public class Board : MonoBehaviour
 
         if (_actionResult["dmgEnemy"].AsInt > 0)
             SpawnMessage(pid0 == 1 ? "damagetaken" : "damagedealt", pause += deltaPause, _actionResult["dmgEnemy"].AsInt);
+
+
+        if (_actionResult["colors"].AsArray.Any(x => x != 0))
+            StonesAcquiredMessage(pause += deltaPause, _actionResult["colors"].AsArray);
 
         players[pid0].Health -= _actionResult["dmgSelf"].AsInt.Value;
         players[pid1].Health -= _actionResult["dmgEnemy"].AsInt.Value;
@@ -609,8 +638,8 @@ public class Board : MonoBehaviour
             valuesEnd: (!isY) ? (object)new { X = cellSize.x * newCoord - 0.01f } : new { Y = cellSize.y * (boardHeight - 1 - newCoord) + 0.01f }
             )
           .AddTimeStamp(
-            changeAcceleration: (!isY) ? (object)new { X = 1000.0f } : new { Y = -1000.0f },
-            changeSpeed: (!isY) ? (object)new { X = -100.0f } : new { Y = 100.0f },
+            changeAcceleration: (!isY) ? (object)new { X = 1100.0f } : new { Y = -1100.0f },
+            changeSpeed: (!isY) ? (object)new { X = -98.0f } : new { Y = 98.0f },
             valuesEnd: (!isY) ? (object)new { X = cellSize.x * newCoord } : new { Y = cellSize.y * (boardHeight - 1 - newCoord) }
           );
     }
