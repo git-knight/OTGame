@@ -23,7 +23,7 @@ namespace TGame.Entities
 
         [NotMapped] public int? HealingStartedWith { get; set; }
         [NotMapped] public DateTime? HealingStartedAt { get; set; }
-        [NotMapped] public int HP_Current { get { return HealingStartedAt.HasValue ? Math.Min(HealingStartedWith.Value + (int)((DateTime.UtcNow - HealingStartedAt.Value).TotalSeconds * healthPerSecond), Stats.Health) : HealingStartedWith ?? Stats.Health; } set { HealingStartedWith = value; } }
+        [NotMapped] public int HP_Current { get { return HealingStartedAt.HasValue ? Math.Min(HealingStartedWith.Value + (int)((DateTime.UtcNow - HealingStartedAt.Value).TotalSeconds * healthPerSecond), Stats.Health) : HealingStartedWith ?? Stats.Health; } set { HealingStartedWith = Math.Min(Stats.Health, value); } }
         [NotMapped] public bool IsAlive => HealingStartedAt.HasValue ? (DateTime.UtcNow > HealingStartedAt + TimeSpan.FromSeconds(RespawnTime) || HealingStartedWith > 0) : true;
 
         [NotMapped] public int[] Stones { get; set; }

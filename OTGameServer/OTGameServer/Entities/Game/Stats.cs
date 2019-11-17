@@ -11,6 +11,11 @@ namespace TGame.Entities
         Health=0,
         Attack,
         Defense,
+        Lifesteal,
+        Resistance,
+        Fury,
+        Counterfury,
+        Speed,
         MinDamage,
         MaxDamage,
 
@@ -25,6 +30,11 @@ namespace TGame.Entities
         public int Health { get => this[StatName.Health]; set { this[StatName.Health] = value; } }
         public int Attack { get => this[StatName.Attack]; set { this[StatName.Attack] = value; } }
         public int Defense { get => this[StatName.Defense]; set { this[StatName.Defense] = value; } }
+        public int Lifesteal { get => this[StatName.Lifesteal]; set { this[StatName.Lifesteal] = value; } }
+        public int Resistance { get => this[StatName.Resistance]; set { this[StatName.Resistance] = value; } }
+        public int Fury { get => this[StatName.Fury]; set { this[StatName.Fury] = value; } }
+        public int Counterfury { get => this[StatName.Counterfury]; set { this[StatName.Counterfury] = value; } }
+        public int Speed { get => this[StatName.Speed]; set { this[StatName.Speed] = value; } }
         public int MinDamage { get => this[StatName.MinDamage]; set { this[StatName.MinDamage] = value; } }
         public int MaxDamage { get => this[StatName.MaxDamage]; set { this[StatName.MaxDamage] = value; } }
 

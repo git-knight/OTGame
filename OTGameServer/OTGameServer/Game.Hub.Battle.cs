@@ -214,10 +214,27 @@ namespace TGame
             var opp = (board.Turn % 2 == 0) ? board.PlayerRight : board.PlayerLeft;
 
             if (res.IsEmpty)
-                res.Damage[0] = 8;
-
+                res.Damage[0] = 4;
             else if (res.Skulls > 0)
-                res.Damage[1] += Math.Max(3, res.Skulls + me.Stats.Attack - opp.Stats.Defense + rand.Next(me.Stats.MinDamage, me.Stats.MaxDamage + 1));
+                res.Damage[1] +=  res.Skulls + me.Stats.Attack + rand.Next(me.Stats.MinDamage, me.Stats.MaxDamage + 1);
+
+            if (res.Damage[1] > 0)
+            {
+                if (me.Stats.Fury > opp.Stats.Counterfury && rand.NextDouble() < ((-20) / (me.Stats.Fury - opp.Stats.Counterfury + 19.5) + 1))
+                {
+                    res.IsCritical = true;
+                    res.Damage[1] += (res.Damage[1] + 1) / 2;
+                }
+
+                if (me.Stats.Lifesteal > opp.Stats.Resistance)
+                    res.Damage[0] -= (int)Math.Round(res.Damage[1] * ((-20) / (me.Stats.Lifesteal - opp.Stats.Resistance + 19.5) + 1));
+            }
+
+            if (res.Damage[0] > 0)
+                res.Damage[0] = Math.Max(3, res.Damage[0] - me.Stats.Defense);
+
+            if (res.Damage[1] > 0)
+                res.Damage[1] = Math.Max(3, res.Damage[1] - opp.Stats.Defense);
 
             me.HP_Current -= res.Damage[0];
             opp.HP_Current -= res.Damage[1];
@@ -230,7 +247,6 @@ namespace TGame
         static private async Task RegenerateBoard(Board board)
         {
             board.Regenerate();
-            //await Clients.Group(board.GroupName).BoardRegenerated(board.ToClient());
             await hubContext.Clients.Group(board.GroupName).SendAsync("InvokeMethod", "Battle.Board.OnRegenerated", board.ToClient());
         }
 

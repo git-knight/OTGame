@@ -498,6 +498,8 @@ public class Board : MonoBehaviour
         if (_actionResult["dmgEnemy"].AsInt > 0)
             SpawnMessage(pid0 == 1 ? "damagetaken" : "damagedealt", pause += deltaPause, _actionResult["dmgEnemy"].AsInt);
 
+        if (_actionResult["isCritical"] == true)
+            SpawnMessage("critical", pause += deltaPause);
 
         if (_actionResult["colors"].AsArray.Any(x => x != 0))
             StonesAcquiredMessage(pause += deltaPause, _actionResult["colors"].AsArray);

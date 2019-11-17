@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class HeroStatsView : MonoBehaviour
 {
     static string[] baseValueNames = { "level", "exp" };
-    static string[] statNames = { "health", "attack", "defense", "minDamage", "maxDamage" };
+    static string[] statNames = { "health", "attack", "defense", "lifesteal", "resistance", "fury", "counterfury", "speed", "minDamage", "maxDamage" };
 
     void Start()
     {

@@ -256,6 +256,7 @@ namespace TGame.Match3
         public int[] Colors { get; set; }
         public int Skulls { get; set; }
         public bool Has4 { get; set; }
+        public bool IsCritical { get; set; }
         public bool IsValid { get; set; }
 
         public bool IsEmpty { get { return Skulls == 0 && !(Colors?.Any(x => x != 0) ?? false) && !Damage.Any(x => x != 0); } }
@@ -267,6 +268,7 @@ namespace TGame.Match3
             Colors = new int[Board.ColorsCount];
             Skulls = 0;
             Has4 = false;
+            IsCritical = false;
         }
 
         static public readonly MoveResult Invalid = new MoveResult { IsValid = false };
@@ -278,7 +280,8 @@ namespace TGame.Match3
                 Colors = a.Colors.Zip(b.Colors, (x, y) => x + y).ToArray(),
                 Damage = a.Damage.Zip(b.Damage, (x, y) => x + y).ToArray(),
                 Skulls = a.Skulls + b.Skulls,
-                Has4 = a.Has4 || b.Has4
+                Has4 = a.Has4 || b.Has4,
+                IsCritical = a.IsCritical || b.IsCritical
             };
         }
 
@@ -290,6 +293,7 @@ namespace TGame.Match3
                 colors = Colors ?? new int[3],
                 dmgSelf = Damage[0],
                 dmgEnemy = Damage[1],
+                IsCritical,
                 IsValid,
                 IsEmpty
             };

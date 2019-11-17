@@ -333,13 +333,23 @@ namespace TGame.Migrations
 
                             b1.Property<int>("Attack");
 
+                            b1.Property<int>("Counterfury");
+
                             b1.Property<int>("Defense");
 
+                            b1.Property<int>("Fury");
+
                             b1.Property<int>("Health");
+
+                            b1.Property<int>("Lifesteal");
 
                             b1.Property<int>("MaxDamage");
 
                             b1.Property<int>("MinDamage");
+
+                            b1.Property<int>("Resistance");
+
+                            b1.Property<int>("Speed");
 
                             b1.HasKey("HeroId");
 

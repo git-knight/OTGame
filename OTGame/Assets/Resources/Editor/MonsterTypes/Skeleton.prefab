@@ -224,9 +224,14 @@ MonoBehaviour:
   Level: 2
   RespawnTime: 16
   BaseStats:
-    Health: 20
-    Attack: 1
-    Defense: 1
+    Health: 50
+    Attack: 3
+    Defense: 5
+    Lifesteal: 0
+    Resistance: 0
+    Fury: 20
+    Counterfury: 0
+    Speed: 0
     MinDamage: 1
     MaxDamage: 2
 --- !u!114 &6031988342580691260
